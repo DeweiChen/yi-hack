@@ -369,8 +369,13 @@ sync
 
 ### Launch record event
 cd /home
-./record_event &
-./mp4record 60 &
+if [[ $(get_config RECORDING) == "YES" ]]; then
+    ./record_event &
+    ./mp4record 60 &
+    log "Recording functionality started"
+else
+    log "Recording functionality disabled by configuration"
+fi
 
 
 ### Some configuration
