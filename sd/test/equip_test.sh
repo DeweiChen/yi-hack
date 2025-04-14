@@ -76,8 +76,12 @@ get_config() {
 ######################################################
 
 ### Launch Telnet server
-log "Start telnet server..."
-telnetd &
+if [[ $(get_config TELNET) == "YES" ]]; then
+    log "Start telnet server..."
+    telnetd &
+else
+    log "Telnet server disabled by configuration"
+fi
 
 
 ### configure timezone
@@ -328,15 +332,19 @@ led -yoff -bon
 sync
 
 ### Launch FTP server
-log "Start ftp server..."
-if [[ $(get_config DEBUG) == "yes" ]] ; then
-    tcpsvd -vE 0.0.0.0 21 ftpd -w / > /${LOG_DIR}/log_ftp.txt 2>&1 &
+if [[ $(get_config FTP) == "YES" ]]; then
+    log "Start ftp server..."
+    if [[ $(get_config DEBUG) == "yes" ]] ; then
+        tcpsvd -vE 0.0.0.0 21 ftpd -w / > /${LOG_DIR}/log_ftp.txt 2>&1 &
+    else
+        tcpsvd -vE 0.0.0.0 21 ftpd -w / &
+    fi
+    sleep 1
+    log "Check for ftp process : "
+    ps | grep tcpsvd | grep -v grep >> ${LOG_FILE}
 else
-    tcpsvd -vE 0.0.0.0 21 ftpd -w / &
+    log "FTP server disabled by configuration"
 fi
-sleep 1
-log "Check for ftp process : "
-ps | grep tcpsvd | grep -v grep >> ${LOG_FILE}
 
 
 ### Launch web server
